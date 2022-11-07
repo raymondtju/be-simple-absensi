@@ -1,7 +1,9 @@
 const express = require('express')
 const cors = require('cors')
-const mysql = require('mysql2')
 const port = 3333
+
+const db = require('./db.config')
+db.sync().then(() => console.log('database connected !'))
 
 const userEndpoint = require('./routes/users')
 
@@ -9,6 +11,6 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-app.use('/', userEndpoint)
+app.use('/users', userEndpoint)
 
-app.listen(port, () => console.log(`running server on port ${port}`))
+app.listen(port, () => console.log(`running server on port ${port}`)) 
