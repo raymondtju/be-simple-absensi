@@ -1,6 +1,8 @@
 const express = require('express')
 const router = express.Router()
 const UsersModel = require('../models/users')
+const bcrypt = require('bcrypt')
+const passwordCheck = require('../utils/passwordCheck')
 
 // endpoint for main users (basic)
 router.get('/',  async (req, res) => {
@@ -16,9 +18,10 @@ router.post('/', async (req, res) => {
     // const nama = req.body.password
     // const password = req.body.password
     const { nip, nama, password } = req.body
+    const encryptPassword = await bcrypt.hash(password, 10)
 
     const users = await UsersModel.create({
-        nip, nama, password
+        nip, nama, password: encryptPassword
     })
     res.status(200).json({
         data: users, 
@@ -28,14 +31,20 @@ router.post('/', async (req, res) => {
 
 router.put('/', async (req, res) => { //mengedit data
     const { nip, nama, password, passwordBaru } = req.body
-    const isUserAva = await UsersModel.findOne({where: {nip: nip}})
+    
+    const check = await passwordCheck(nip, password)
 
-    if (isUserAva.password === password){
+    const encryptPassword = await bcrypt.hash(passwordBaru, 10)
+    // res.json({
+    //     compare
+    // })
+
+    if (check.compare === true){
         const users = await UsersModel.update({
-            nama, password: passwordBaru
+            nama, password: encryptPassword
         }, {where: {nip: nip}})
         res.status(200).json({
-            userName: isUserAva.nama,
+            userName: users,
             toName: nama,
             metadata: "user updated!"
         })
@@ -44,6 +53,24 @@ router.put('/', async (req, res) => { //mengedit data
             "error": "invalid data"
         })
     }
+})
+
+router.post('/login', async(req, res) => {
+    const { nip, password } = req.body
+    const check = await passwordCheck(nip, password)
+    
+    if (check.compare === true){
+        res.status(200).json({
+            users: check.isUserAva,
+            metadata: "login success!"
+        })
+    } else {
+        res.status(400).json({
+            error: "data invalid"
+        })
+    }
+
+    
 })
 
 module.exports = router
