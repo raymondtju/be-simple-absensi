@@ -57,18 +57,21 @@ router.put('/', async (req, res) => { //mengedit data
 
 router.post('/login', async(req, res) => {
     const { nip, password } = req.body
-    const check = await passwordCheck(nip, password)
-    
-    if (check.compare === true){
-        res.status(200).json({
-            users: check.isUserAva,
-            metadata: "login success!"
-        })
-    } else {
+    try {
+        const check = await passwordCheck(nip, password)
+        
+        if (check.compare === true){
+            res.status(200).json({
+                users: check.isUserAva,
+                metadata: "login success!"
+            })
+        }
+    } catch (e){
         res.status(400).json({
             error: "data invalid"
         })
     }
+    
 
     
 })
