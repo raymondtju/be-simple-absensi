@@ -24,7 +24,7 @@ router.post('/', async (req, res) => {
         nip, nama, password: encryptPassword
     })
     res.status(200).json({
-        data: users, 
+        registered: users, 
         metadatasss: "endpoint user" 
     })
 })
